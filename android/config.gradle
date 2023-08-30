@@ -1,0 +1,23 @@
+ext {
+    android = [
+            compileSdkVersion: 31,
+            buildToolsVersion: "31.0.0",
+            minSdkVersion    : 26,
+            targetSdkVersion : 31,
+    ]
+
+    keystore = [
+            storePassword:"x123456",
+            keyPassword:"x123456",
+            keyAlias:"xkeystore",
+            storeFile:"./xkeystore.jks",
+    ]
+
+    versions = [
+            "splashscreen_version":"1.0.0-alpha01",
+    ]
+
+    dependencies = [
+            splashscreen:"androidx.core:core-splashscreen:${versions['splashscreen_version']}",
+    ]
+}

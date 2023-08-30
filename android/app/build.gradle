@@ -1,0 +1,154 @@
+def localProperties = new Properties()
+def localPropertiesFile = rootProject.file('local.properties')
+if (localPropertiesFile.exists()) {
+    localPropertiesFile.withReader('UTF-8') { reader ->
+        localProperties.load(reader)
+    }
+}
+
+def flutterRoot = localProperties.getProperty('flutter.sdk')
+if (flutterRoot == null) {
+    throw new FileNotFoundException("Flutter SDK not found. Define location with flutter.sdk in the local.properties file.")
+}
+
+def flutterVersionCode = localProperties.getProperty('flutter.versionCode')
+if (flutterVersionCode == null) {
+    flutterVersionCode = '1'
+}
+
+def flutterVersionName = localProperties.getProperty('flutter.versionName')
+if (flutterVersionName == null) {
+    flutterVersionName = '1.0'
+}
+
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply from: "$flutterRoot/packages/flutter_tools/gradle/flutter.gradle"
+
+android {
+    compileSdkVersion rootProject.ext.android.compileSdkVersion
+    ndkVersion flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    defaultConfig {
+        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
+        applicationId "com.cdx.xflutter"
+        // You can update the following values to match your application needs. 
+        // For more information, see: https://docs.flutter.dev/deployment/android#reviewing-the-build-configuration.
+        minSdkVersion rootProject.ext.android.minSdkVersion
+        targetSdkVersion rootProject.ext.android.targetSdkVersion
+        versionCode flutterVersionCode.toInteger()
+        versionName flutterVersionName
+        ndk {
+            //abiFilters 'armeabi-v7a','armeabi','arm64-v8a','x86'  //debug 包
+            abiFilters 'armeabi', 'arm64-v8a' // release包
+        }
+        //设置节点值，如极光之类的..
+//        manifestPlaceholders = [
+//                JPUSH_PKGNAME : applicationId,
+//                JPUSH_APPKEY : "", // NOTE: JPush 上注册的包名对应的 Appkey.
+//                JPUSH_CHANNEL : "developer-default", //暂时填写默认值即可.
+//        ]
+    }
+
+    signingConfigs {
+        debug {
+            keyAlias rootProject.ext.keystore.keyAlias
+            keyPassword rootProject.ext.keystore.keyPassword
+            storeFile file(rootProject.ext.keystore.storeFile)
+            storePassword rootProject.ext.keystore.storePassword
+        }
+        release {
+            keyAlias rootProject.ext.keystore.keyAlias
+            keyPassword rootProject.ext.keystore.keyPassword
+            storeFile file(rootProject.ext.keystore.storeFile)
+            storePassword rootProject.ext.keystore.storePassword
+        }
+    }
+
+    buildTypes {
+        debug {
+            signingConfig signingConfigs.debug
+        }
+        release {
+            minifyEnabled false
+            shrinkResources false
+            signingConfig signingConfigs.release
+        }
+    }
+
+    flavorDimensions "channel"
+    productFlavors {
+        develop {
+            dimension "channel"
+            manifestPlaceholders = [CHANNEL_NAME: "develop"]
+        }
+//        yingyongbao {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "yingyongbao"]
+//        }
+//        huawei {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "huawei"]
+//        }
+//        xiaomi {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "xiaomi"]
+//        }
+//        oppo {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "oppo"]
+//        }
+//        vivo {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "vivo"]
+//        }
+//        weibo {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "weibo"]
+//        }
+//        bzhan {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "bzhan"]
+//        }
+//        toutiao {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "toutiao"]
+//        }
+//        guangdiantong {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "guangdiantong"]
+//        }
+//        baidu {
+//            dimension "channel"
+//            manifestPlaceholders = [CHANNEL_NAME: "baidu"]
+//        }
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def fileName
+            if (variant.buildType.name == "release") {
+                fileName = "xflutter-${variant.productFlavors[0].name}-${variant.versionName}.apk"
+            } else {
+                fileName = "xflutter.apk"
+            }
+            output.outputFileName = fileName
+        }
+    }
+
+    lintOptions {
+        checkReleaseBuilds false
+    }
+}
+
+dependencies {
+    implementation rootProject.ext.dependencies.splashscreen
+}
+
+flutter {
+    source '../..'
+}
